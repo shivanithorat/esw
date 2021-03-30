@@ -78,12 +78,12 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
     reset(locationServiceUtil, sequencerUtil, sequenceComponentUtil, agentUtil)
   }
 
-  private def failedFuture(reason: String, delay: Long) = {
-    Thread.sleep(delay)
-    Future.failed(new Exception(reason))
-  }
-
   "Sequence Manager " must {
+
+    def failedFuture(reason: String, delay: Long) = {
+      Thread.sleep(delay)
+      Future.failed(new Exception(reason))
+    }
 
     "be able to handle next messages if the previous Provision call times-out due to downstream error | ESW-473" in {
       val exceptionReason = "Ask timed out after [29000] ms"
