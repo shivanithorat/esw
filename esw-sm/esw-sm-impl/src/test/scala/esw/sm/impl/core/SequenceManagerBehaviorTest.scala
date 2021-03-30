@@ -81,7 +81,8 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
   "Sequence Manager " must {
 
     def failedFuture(reason: String, delay: FiniteDuration) = {
-      akka.pattern.after(delay)(Future.failed(new Exception(reason)))
+      Thread.sleep(1000)
+      Future.failed(new Exception(reason))
     }
 
     "be able to handle next messages if the previous Provision call times-out due to downstream error | ESW-473" in {
@@ -126,7 +127,7 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
 
     "be able to handle next messages if the previous ShutdownSequencer call times-out due to downstream error | ESW-473" in {
       val exceptionReason = "Ask timed out after [10000] ms"
-      when(sequencerUtil.shutdownSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, delay = 1000.second))
+      when(sequencerUtil.shutdownSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, delay = 1.second))
 
       val testProbe = TestProbe[ShutdownSequencersResponse]()
       assertState(Idle)
@@ -141,7 +142,7 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
 
     "be able to handle next messages if the previous RestartSequencer call times-out due to downstream error | ESW-473" in {
       val exceptionReason = "Unable to create sequencer client"
-      when(sequencerUtil.restartSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, 1000.second))
+      when(sequencerUtil.restartSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, 1.second))
 
       val testProbe = TestProbe[RestartSequencerResponse]()
       assertState(Idle)
@@ -158,7 +159,7 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
       val prefix          = Prefix(ESW, "primary")
       val exceptionReason = "Ask timed out after [8000] ms"
 
-      when(sequenceComponentUtil.shutdownSequenceComponent(prefix)).thenReturn(failedFuture(exceptionReason, 1000.second))
+      when(sequenceComponentUtil.shutdownSequenceComponent(prefix)).thenReturn(failedFuture(exceptionReason, 1.second))
       val testProbe = TestProbe[ShutdownSequenceComponentResponse]()
       assertState(Idle)
       smRef ! ShutdownSequenceComponent(prefix, testProbe.ref)

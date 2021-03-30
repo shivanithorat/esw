@@ -35,4 +35,4 @@ jobs:
           sudo ln -s $(which kotlinc) /usr/local/bin/kotlinc
 
       - name: Unit Tests
-        run: sbt -Dakka.actor.serialize-messages=on -DenableCoverage=true -DgenerateStoryReport=true -DdisableIntegrationTests test:test
+        run: sbt 'esw-sm-impl/testOnly esw.sm.impl.core.SequenceManagerBehaviorTest'
