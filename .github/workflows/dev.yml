@@ -38,47 +38,6 @@ jobs:
         run: |
           sbtn clean
           sbtn scalafmtCheck
-          sbtn makeSite
 
       - name: Unit Tests
         run: sbt -Dakka.actor.serialize-messages=on -DenableCoverage=true -DgenerateStoryReport=true -DdisableIntegrationTests test:test
-
-      - name: Integration Tests
-        run: sbt -Dakka.actor.serialize-messages=on -DenableCoverage=true -DgenerateStoryReport=true esw-integration-test/test:test
-
-      - name: Coverage Report
-        run: |
-          sbt -DenableCoverage=true coverageReport
-          sbtn coverageAggregate
-
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: Coverage Report
-          path: target/scala-2.13/scoverage-report
-
-      - name: Multi-Jvm Tests
-        run: sbt -DgenerateStoryReport=true esw-integration-test/multi-jvm:test
-
-      - name: Generate RTM
-        if: always()
-        continue-on-error: true
-        run: |
-          cs launch --channel https://raw.githubusercontent.com/tmtsoftware/osw-apps/master/apps.json rtm:33b2359b23 -- target/RTM/testStoryMapping.txt tools/RTM/storyRequirementMapping.csv target/RTM/testRequirementsMapping.txt
-
-      - name: Upload RTM
-        if: always()
-        continue-on-error: true
-        uses: actions/upload-artifact@v2
-        with:
-          name: RTM
-          path: target/RTM
-
-      - name: Notify slack
-        if: always()
-        continue-on-error: true
-        uses: kpritam/slack-job-status-action@v1
-        with:
-          job-status: ${{ job.status }}
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          channel: ci-dev
