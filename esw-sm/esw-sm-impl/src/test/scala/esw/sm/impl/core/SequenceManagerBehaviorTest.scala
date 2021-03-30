@@ -156,7 +156,7 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
 
     "be able to handle next messages if the previous RestartSequencer call times-out due to downstream error | ESW-473" in {
       val exceptionReason = "Unable to create sequencer client"
-      when(sequencerUtil.restartSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, 1.seconds))
+      when(sequencerUtil.restartSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, 1500.milliseconds))
 
       val testProbe = TestProbe[RestartSequencerResponse]()
       assertState(Idle)
@@ -173,7 +173,7 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
       val prefix          = Prefix(ESW, "primary")
       val exceptionReason = "Ask timed out after [8000] ms"
 
-      when(sequenceComponentUtil.shutdownSequenceComponent(prefix)).thenReturn(failedFuture(exceptionReason, 1.seconds))
+      when(sequenceComponentUtil.shutdownSequenceComponent(prefix)).thenReturn(failedFuture(exceptionReason, 1500.milliseconds))
       val testProbe = TestProbe[ShutdownSequenceComponentResponse]()
       assertState(Idle)
       smRef ! ShutdownSequenceComponent(prefix, testProbe.ref)
