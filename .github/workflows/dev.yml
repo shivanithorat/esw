@@ -34,10 +34,5 @@ jobs:
           sdk install kotlin
           sudo ln -s $(which kotlinc) /usr/local/bin/kotlinc
 
-      - name: Build
-        run: |
-          sbtn clean
-          sbtn scalafmtCheck
-
       - name: Unit Tests
         run: sbt -Dakka.actor.serialize-messages=on -DenableCoverage=true -DgenerateStoryReport=true -DdisableIntegrationTests test:test
