@@ -85,19 +85,6 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
       Future.failed(new Exception(reason))
     }
 
-//    val sequenceComponentAllocator = mock[SequenceComponentAllocator]
-//    val sequenceComponentUtil1 = new SequenceComponentUtil(locationServiceUtil, sequenceComponentAllocator)
-//    val sequencerUtil1 = new SequencerUtil(locationServiceUtil, sequenceComponentUtil1)
-//
-//    val smBehavior = new SequenceManagerBehavior(
-//      config,
-//      locationServiceUtil,
-//      agentUtil,
-//      sequencerUtil,
-//      sequenceComponentUtil
-//    )
-//    lazy val smRef: ActorRef[SequenceManagerMsg] = actorSystem.systemActorOf(smBehavior.setup, "sm_test_actor")
-
     "be able to handle next messages if the previous Provision call times-out due to downstream error | ESW-473" in {
       val exceptionReason = "Ask timed out after [29000] ms"
       val provisionConfig = ProvisionConfig(Prefix(ESW, "primary") -> 2, Prefix(IRIS, "primary") -> 2)
@@ -110,7 +97,6 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
 
       assertState(Idle)
       smRef ! Provision(provisionConfig, provisionResponseProbe.ref)
-      assertState(Processing)
       assertState(Idle)
 
       verify(agentUtil).provision(provisionConfig)
@@ -129,7 +115,6 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
       val configureProbe = TestProbe[ConfigureResponse]()
       assertState(Idle)
       smRef ! Configure(darkNight, configureProbe.ref)
-      assertState(Processing)
       // goes back to idle after exception
       assertState(Idle)
 
@@ -140,13 +125,11 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
 
     "be able to handle next messages if the previous ShutdownSequencer call times-out due to downstream error | ESW-473" in {
       val exceptionReason = "Ask timed out after [10000] ms"
-
       when(sequencerUtil.shutdownSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, delay = 1.seconds))
 
       val testProbe = TestProbe[ShutdownSequencersResponse]()
       assertState(Idle)
       smRef ! ShutdownSequencer(ESW, darkNight, testProbe.ref)
-      assertState(Processing)
       // goes back to idle after exception
       assertState(Idle)
 
@@ -156,12 +139,11 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
 
     "be able to handle next messages if the previous RestartSequencer call times-out due to downstream error | ESW-473" in {
       val exceptionReason = "Unable to create sequencer client"
-      when(sequencerUtil.restartSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, 1500.milliseconds))
+      when(sequencerUtil.restartSequencer(ESW, darkNight)).thenReturn(failedFuture(exceptionReason, 1.seconds))
 
       val testProbe = TestProbe[RestartSequencerResponse]()
       assertState(Idle)
       smRef ! RestartSequencer(ESW, darkNight, testProbe.ref)
-      assertState(Processing)
       // goes back to idle after exception
       assertState(Idle)
 
@@ -173,11 +155,10 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
       val prefix          = Prefix(ESW, "primary")
       val exceptionReason = "Ask timed out after [8000] ms"
 
-      when(sequenceComponentUtil.shutdownSequenceComponent(prefix)).thenReturn(failedFuture(exceptionReason, 1500.milliseconds))
+      when(sequenceComponentUtil.shutdownSequenceComponent(prefix)).thenReturn(failedFuture(exceptionReason, 1.seconds))
       val testProbe = TestProbe[ShutdownSequenceComponentResponse]()
       assertState(Idle)
       smRef ! ShutdownSequenceComponent(prefix, testProbe.ref)
-      assertState(Processing)
       // goes back to idle after exception
       assertState(Idle)
 
