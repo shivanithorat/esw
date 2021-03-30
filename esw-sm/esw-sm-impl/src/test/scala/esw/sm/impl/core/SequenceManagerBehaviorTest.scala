@@ -81,7 +81,7 @@ class SequenceManagerBehaviorTest extends BaseTestSuite with TableDrivenProperty
   "Sequence Manager " must {
 
     def failedFuture(reason: String, delay: FiniteDuration) = {
-      Thread.sleep(1000)
+      akka.pattern.after(delay)(Future.failed(new Exception(reason)))
       Future.failed(new Exception(reason))
     }
 
